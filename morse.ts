@@ -1,15 +1,15 @@
 //% color=#6a8694
 //% icon="\uf141"
-//% block="摩斯電碼"
-//% groups="['按鍵', '解碼', '編碼', '進階']"
+//% block="摩斯密碼"
+//% groups="['按鍵輸入', '解碼', '編碼', '進階功能']"
 namespace morse {
 
     export enum Silence {
-        //% block="字母間間隔"
+        //% block="字母間隔"
         InterLetter = 3,
-        //% block="字詞間間隔"
+        //% block="字詞間隔"
         InterWord = 7,
-        //% block="點與點間間隔"
+        //% block="短劃間隔"
         Small = 0,
     }
         
@@ -21,7 +21,7 @@ namespace morse {
     const MAX_STATE = morseTree.length-1
     const START_STATE = 0
     const ERROR_CODE = '?'
-    const UPDATE_INTERVAL = 100 // 檢查更新間隔(ms)
+    const UPDATE_INTERVAL = 100 // 每100毫秒看看有沒有新動作
     const MAX_SEQUENCE_LENGTH = 7
 
     // 目前在摩斯樹的位置
@@ -29,11 +29,11 @@ namespace morse {
     let sequence = ""
     let codeSelectHandler: (code: string, sequence: string) => void = null
 
-    // 按鍵符號輸入計時參數
-    let _maxDotTime = 200 // 點的最大時間(ms)
-    let _maxDashTime = 1000 // 劃的最大時間(ms)
-    let _maxBetweenSymbolsTime = 500 // 符號間最大停頓(ms)
-    let _maxBetweenLettersTime = 2000 // 字母間最大停頓(ms)
+    // 計時參數，控制短劃和長劃的長短還有停頓時間
+    let _maxDotTime = 200
+    let _maxDashTime = 1000
+    let _maxBetweenSymbolsTime = 500
+    let _maxBetweenLettersTime = 2000
 
     let keyDownEvent : number = null
     let keyUpEvent : number = null
@@ -41,17 +41,17 @@ namespace morse {
     let symbolHandler: (sym: string) => void = null
 
     /**
-     * 按鍵按下事件
+     * 按鍵按下了，開始計時
      */
     //% blockId=keyDown block="按鍵按下"
-    //% group="按鍵"
+    //% group="按鍵輸入"
     //% weight=900
     export function keyDown() {
         const now = control.millis()
 
         if (keyUpEvent != null) {
             const duration = now - keyUpEvent
-            // 超過符號間停頓視為字母間停頓
+            // 停頓超過符號間隔？那就是字母之間囉
             if(duration > _maxBetweenSymbolsTime) {
                 silence(Silence.InterLetter)
             }
@@ -62,10 +62,10 @@ namespace morse {
     }
 
     /**
-     * 按鍵放開事件
+     * 按鍵放開了，根據按的時間判斷短劃或長劃
      */
     //% blockId=keyUp block="按鍵放開"
-    //% group="按鍵"
+    //% group="按鍵輸入"
     //% weight=875
     export function keyUp() {
         const now = control.millis()
@@ -76,7 +76,7 @@ namespace morse {
             } else if (duration > _maxDotTime && duration < _maxDashTime) {
                 dash()
             } else {
-                // 無效時間，重設狀態
+                // 按太久了，可能按錯了，就重頭開始吧
                 resetDecoding()
                 resetTiming()
             }
@@ -87,11 +87,11 @@ namespace morse {
     }
     
     /**
-     * 設定點和劃的最大持續時間 (ms)
+     * 想調整短劃和長劃的長度嗎？這邊可以設定喔
      */
-    //% blockId=setMaxDurationDotDash block="設定點長度為 $dotTime 毫秒，劃長度為 $dashTime 毫秒" 
+    //% blockId=setMaxDurationDotDash block="設定「短劃」最大長度 $dotTime 毫秒，「長劃」最大長度 $dashTime 毫秒" 
     //% advanced=true
-    //% group="按鍵"
+    //% group="按鍵輸入"
     //% inlineInputMode=external
     //% weight=870
     //% dotTime.defl=200 dotTime.min=10 dotTime.max=5000
@@ -102,10 +102,10 @@ namespace morse {
     }
 
     /**
-     * 取得最大點時間 (ms)
+     * 最大「短劃」時間（毫秒）
      */
-    //% block="最大點長度 (毫秒)" 
-    //% group="按鍵"
+    //% block="最大「短劃」時間 (毫秒)" 
+    //% group="按鍵輸入"
     //% advanced=true
     //% weight=860
     export function maxDotTime() : number {
@@ -113,10 +113,10 @@ namespace morse {
     }
 
     /**
-     * 取得最大劃時間 (ms)
+     * 最大「長劃」時間（毫秒）
      */
-    //% block="最大劃長度 (毫秒)" 
-    //% group="按鍵"
+    //% block="最大「長劃」時間 (毫秒)" 
+    //% group="按鍵輸入"
     //% advanced=true
     //% weight=850
     export function maxDashTime(): number {
@@ -124,11 +124,11 @@ namespace morse {
     }
 
     /**
-     * 設定符號及字母間最大停頓時間 (ms)
+     * 想調整符號之間和字母之間停頓多久？這裡可以設定
     */
-    //% blockId=setMaxSilenceBetweenSymbolsLetters block="設定符號間最大停頓時間 $symbolTime 毫秒，字母間最大停頓時間 $letterTime 毫秒" 
+    //% blockId=setMaxSilenceBetweenSymbolsLetters block="設定符號間最大停頓 $symbolTime 毫秒，字母間最大停頓 $letterTime 毫秒" 
     //% advanced=true
-    //% group="按鍵"
+    //% group="按鍵輸入"
     //% weight=840
     //% inlineInputMode=external
     //% symbolTime.defl=500 symbolTime.min=10 symbolTime.max=5000
@@ -139,10 +139,10 @@ namespace morse {
     }
 
     /**
-     * 取得符號間最大停頓時間 (ms)
+     * 最大符號停頓時間
      */
-    //% block="最大符號間停頓時間 (毫秒)" 
-    //% group="按鍵"
+    //% block="最大符號間停頓 (毫秒)" 
+    //% group="按鍵輸入"
     //% advanced=true
     //% weight=830
     export function maxBetweenSymbolTime(): number {
@@ -150,10 +150,10 @@ namespace morse {
     }
 
     /**
-     * 取得字母間最大停頓時間 (ms)
+     * 最大字母停頓時間
      */
-    //% block="最大字母間停頓時間 (毫秒)" 
-    //% group="按鍵"
+    //% block="最大字母間停頓 (毫秒)" 
+    //% group="按鍵輸入"
     //% advanced=true
     //% weight=820
     export function maxBetweenLetterTime(): number {
@@ -161,10 +161,10 @@ namespace morse {
     }
 
     /**
-     * 重設按鍵計時狀態
+     * 重設按鍵計時，從頭開始
      */
     //% blockId=resetTiming block="重設計時"
-    //% group="按鍵" advanced=true
+    //% group="按鍵輸入" advanced=true
     //% weight=810
     export function resetTiming() {
         keyDownEvent = null
@@ -173,10 +173,10 @@ namespace morse {
     }
 
     /**
-     * 新符號輸入事件 (點或劃)
+     * 新輸入符號事件，會傳入「短劃」或「長劃」
      */
-    //% blockId=onNewSymbol block="當輸入新符號 $newSymbol 時"
-    //% group="按鍵"
+    //% blockId=onNewSymbol block="輸入新符號 $newSymbol"
+    //% group="按鍵輸入"
     //% draggableParameters
     //% advanced=true
     //% weight=800
@@ -185,9 +185,9 @@ namespace morse {
     }
 
     /**
-     * 字元解碼完成事件，包含點劃序列。字詞間用底線(_)表示。
+     * 字元解碼完成的事件，會告訴你解到哪個字和符號序列
      */
-    //% blockId=onCodeSelected block="當 $code ($sequence) 被解碼完成"
+    //% blockId=onCodeSelected block="解碼完成 $code ($sequence)"
     //% group="解碼"
     //% draggableParameters
     //% weight=775
@@ -196,9 +196,9 @@ namespace morse {
     }
 
     /**
-     * 記錄一個點
+     * 記錄一個「短劃」
      */
-    //% blockId=dot block="點"
+    //% blockId=dot block="輸入「短劃」"
     //% group="解碼"
     //% advanced=true
     //% weight=950
@@ -208,14 +208,14 @@ namespace morse {
             sequence += DOT_CHAR
         }
         if(symbolHandler != null) {
-            symbolHandler(".")
+            symbolHandler("\".\"")
         }
     }
 
     /**
-     * 記錄一個劃
+     * 記錄一個「長劃」
      */
-    //% blockId=dash block="劃"
+    //% blockId=dash block="輸入「長劃」"
     //% group="解碼"
     //% advanced=true
     //% weight=925
@@ -225,7 +225,7 @@ namespace morse {
             sequence += DASH_CHAR
         }
         if (symbolHandler != null) {
-            symbolHandler("-")
+            symbolHandler("\"-\"")
         }
     }
 
@@ -267,7 +267,7 @@ namespace morse {
     }
 
     /**
-     * 重設解碼狀態
+     * 重設解碼狀態，從頭開始唷
      */
     //% blockId=resetDecoding block="重設解碼狀態"
     //% group="解碼"
@@ -279,9 +279,9 @@ namespace morse {
     }  
 
     /**
-       * 查看目前解碼結果
+       * 看看目前解到什麼了
        */
-    //% blockId=peekCode block="檢視目前解碼"
+    //% blockId=peekCode block="看目前解碼"
     //% group="解碼"
     //% advanced=true
     //% weight=820
@@ -290,9 +290,9 @@ namespace morse {
     }
 
     /**
-     * 查看目前點劃序列
+     * 看看目前符號序列長什麼樣
      */
-    //% blockId=peekSequence block="檢視目前符號序列"
+    //% blockId=peekSequence block="看目前符號序列"
     //% group="解碼"
     //% advanced=true
     //% weight=810
@@ -300,7 +300,7 @@ namespace morse {
         return sequence;
     }
 
-    // 找出單一字元的摩斯碼，無效字元回傳 '?'
+    // 找單一字的摩斯密碼，找不到就回傳問號
     function encodeChar(character: string) : string {
         if (character.length != 1) {
             return null
@@ -323,9 +323,9 @@ namespace morse {
     }
 
     /**
-     * 將字串編碼為摩斯電碼，回傳由點、劃、停頓符號組成的字串
+     * 把字串轉成摩斯密碼，回傳點、劃和停頓的組合
      */
-    //% blockId=encode block="編碼 $characters 為摩斯電碼"
+    //% blockId=encode block="編碼 $characters 成摩斯密碼"
     //% group="編碼"
     //% weight=500
     export function encode(characters: string) : string {
