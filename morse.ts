@@ -21,19 +21,19 @@ namespace morse {
     const MAX_STATE = morseTree.length-1
     const START_STATE = 0
     const ERROR_CODE = '?'
-    const UPDATE_INTERVAL = 100 // ms to check for updates
+    const UPDATE_INTERVAL = 100 // 檢查更新間隔(ms)
     const MAX_SEQUENCE_LENGTH = 7
 
-    // Current position in Morse tree
+    // 目前在摩斯樹的位置
     let state = START_STATE
     let sequence = ""
     let codeSelectHandler: (code: string, sequence: string) => void = null
 
-    // State variables for timing of keying in new symbols
-    let _maxDotTime = 200 // ms 
-    let _maxDashTime = 1000 // ms
-    let _maxBetweenSymbolsTime = 500 // ms
-    let _maxBetweenLettersTime = 2000 // ms
+    // 按鍵符號輸入計時參數
+    let _maxDotTime = 200 // 點的最大時間(ms)
+    let _maxDashTime = 1000 // 劃的最大時間(ms)
+    let _maxBetweenSymbolsTime = 500 // 符號間最大停頓(ms)
+    let _maxBetweenLettersTime = 2000 // 字母間最大停頓(ms)
 
     let keyDownEvent : number = null
     let keyUpEvent : number = null
@@ -41,7 +41,7 @@ namespace morse {
     let symbolHandler: (sym: string) => void = null
 
     /**
-     * The "key" to enter a Morse character has been pressed
+     * 按鍵按下事件
      */
     //% blockId=keyDown block="按鍵按下"
     //% group="按鍵"
@@ -51,7 +51,7 @@ namespace morse {
 
         if (keyUpEvent != null) {
             const duration = now - keyUpEvent
-            // Check for word spacing
+            // 超過符號間停頓視為字母間停頓
             if(duration > _maxBetweenSymbolsTime) {
                 silence(Silence.InterLetter)
             }
@@ -62,22 +62,21 @@ namespace morse {
     }
 
     /**
-     * The "key" to enter a Morse character has been released
+     * 按鍵放開事件
      */
     //% blockId=keyUp block="按鍵放開"
     //% group="按鍵"
     //% weight=875
     export function keyUp() {
         const now = control.millis()
-        // Process how long the key was down 
         if (keyDownEvent != null) {
             const duration = now - keyDownEvent
             if (duration <= _maxDotTime) {
                 dot()
             } else if (duration > _maxDotTime && duration < _maxDashTime) {
                 dash()
-            } else { // > _maxDashTime 
-                // Invalid duration; Reset this symbol 
+            } else {
+                // 無效時間，重設狀態
                 resetDecoding()
                 resetTiming()
             }
@@ -88,10 +87,7 @@ namespace morse {
     }
     
     /**
-     * Set the length of time for a "dot" and "dash" in milliseconds (10ms-5000ms)
-     * The max dash time will always be at least twice the dot time.
-     * A dash will be any key hold between 10ms and the max dot time.  A dash will be anything greater than the dot time and less than the max dash time.
-     * Values greater than the max dash time will "reset" the state of decoding.
+     * 設定點和劃的最大持續時間 (ms)
      */
     //% blockId=setMaxDurationDotDash block="設定點長度為 $dotTime 毫秒，劃長度為 $dashTime 毫秒" 
     //% advanced=true
@@ -101,25 +97,23 @@ namespace morse {
     //% dotTime.defl=200 dotTime.min=10 dotTime.max=5000
     //% dashTime.defl=1000 dashTime.min=10 dashTime.max=15000
     export function setMaxDurationDotDash(dotTime: number, dashTime: number) {
-        // Minimum time of 100ms
         _maxDotTime = Math.constrain(dotTime, 1, 5000)
         _maxDashTime = Math.constrain(dashTime, 2*_maxDotTime, 15000)
     }
 
     /**
-     * The maximum length of time for a "dot" in milliseconds (1-5000ms)
+     * 取得最大點時間 (ms)
      */
     //% block="最大點長度 (毫秒)" 
     //% group="按鍵"
     //% advanced=true
     //% weight=860
     export function maxDotTime() : number {
-        // Minimum time of 100ms
         return _maxDotTime
     }
 
     /**
-     * The maximum length of time for a "dash" in milliseconds (2*max dot time-15000ms)
+     * 取得最大劃時間 (ms)
      */
     //% block="最大劃長度 (毫秒)" 
     //% group="按鍵"
@@ -129,9 +123,8 @@ namespace morse {
         return _maxDashTime
     }
 
-
     /**
-     * Set the length of time for a silence events in milliseconds. The time between letters will always be at least the time between symbols.
+     * 設定符號及字母間最大停頓時間 (ms)
     */
     //% blockId=setMaxSilenceBetweenSymbolsLetters block="設定符號間最大停頓時間 $symbolTime 毫秒，字母間最大停頓時間 $letterTime 毫秒" 
     //% advanced=true
@@ -146,7 +139,7 @@ namespace morse {
     }
 
     /**
-     * The maximum length of time between symbols  (dots/dashes) in milliseconds
+     * 取得符號間最大停頓時間 (ms)
      */
     //% block="最大符號間停頓時間 (毫秒)" 
     //% group="按鍵"
@@ -157,7 +150,7 @@ namespace morse {
     }
 
     /**
-     * The maximum length of time between letters of a word in milliseconds
+     * 取得字母間最大停頓時間 (ms)
      */
     //% block="最大字母間停頓時間 (毫秒)" 
     //% group="按鍵"
@@ -167,9 +160,8 @@ namespace morse {
         return _maxBetweenLettersTime
     }
 
-
     /**
-     * Reset timing for key up/down
+     * 重設按鍵計時狀態
      */
     //% blockId=resetTiming block="重設計時"
     //% group="按鍵" advanced=true
@@ -181,7 +173,7 @@ namespace morse {
     }
 
     /**
-     *  Respond to a new symbol
+     * 新符號輸入事件 (點或劃)
      */
     //% blockId=onNewSymbol block="當輸入新符號 $newSymbol 時"
     //% group="按鍵"
@@ -193,7 +185,7 @@ namespace morse {
     }
 
     /**
-     *  Respond to a completed code for a character (includes the sequences of dots/dashes). Code will be an underscore (_) when words are completed. 
+     * 字元解碼完成事件，包含點劃序列。字詞間用底線(_)表示。
      */
     //% blockId=onCodeSelected block="當 $code ($sequence) 被解碼完成"
     //% group="解碼"
@@ -204,7 +196,7 @@ namespace morse {
     }
 
     /**
-     * Record a complete dot
+     * 記錄一個點
      */
     //% blockId=dot block="點"
     //% group="解碼"
@@ -221,7 +213,7 @@ namespace morse {
     }
 
     /**
-     * Record a complete dash
+     * 記錄一個劃
      */
     //% blockId=dash block="劃"
     //% group="解碼"
@@ -238,7 +230,7 @@ namespace morse {
     }
 
     /**
-     * Record a silence of some sort (between characters or words)
+     * 停頓事件（字母間或字詞間）
      */
     //% blockId=silence block="停頓 %kind"
     //% kind.defl=Silence.InterLetter
@@ -247,7 +239,6 @@ namespace morse {
     //% weight=900
     export function silence(kind?: Silence) {
 
-        // Ignore small silences (between symbols of code)
         if (kind == null || kind == Silence.Small) {
             return;
         }
@@ -264,7 +255,6 @@ namespace morse {
             }
         }
 
-        // Process code: Send " " for end of word/transmission.
         if (codeSelectHandler != null) {
             if(kind == Silence.InterWord) {
                 codeSelectHandler(" ", "")
@@ -277,7 +267,7 @@ namespace morse {
     }
 
     /**
-     * Reset processing of a dot/dash/silence sequence
+     * 重設解碼狀態
      */
     //% blockId=resetDecoding block="重設解碼狀態"
     //% group="解碼"
@@ -289,7 +279,7 @@ namespace morse {
     }  
 
     /**
-       * Peek at the code that would be chosen from the current sequence if there is a sufficient silence
+       * 查看目前解碼結果
        */
     //% blockId=peekCode block="檢視目前解碼"
     //% group="解碼"
@@ -300,8 +290,7 @@ namespace morse {
     }
 
     /**
-     * Peek at the sequence of dots/dashes that is currently entered. 
-     * 
+     * 查看目前點劃序列
      */
     //% blockId=peekSequence block="檢視目前符號序列"
     //% group="解碼"
@@ -311,14 +300,11 @@ namespace morse {
         return sequence;
     }
 
-    // Find the code for a single character 
-    // Length of string must be exactly 1
-    // Returns null for invalid characters
+    // 找出單一字元的摩斯碼，無效字元回傳 '?'
     function encodeChar(character: string) : string {
         if (character.length != 1) {
             return null
         }
-        // Upper case it
         character = character.toUpperCase()
         let start = morseTree.indexOf(character.charAt(0))
         if(start==-1) {
@@ -326,7 +312,6 @@ namespace morse {
         }
         let code = ""
         while(start>0) {
-            // Odds represent dots
             if(start%2==1) {
                 code = DOT_CHAR + code
             } else {
@@ -338,8 +323,7 @@ namespace morse {
     }
 
     /**
-     * Encode the given characters to morse code.
-     * @return string of dots, dashes, silences (between chars), _ (between words), "?" (invalid character for Morse Code), and newlines (for newlines).
+     * 將字串編碼為摩斯電碼，回傳由點、劃、停頓符號組成的字串
      */
     //% blockId=encode block="編碼 $characters 為摩斯電碼"
     //% group="編碼"
@@ -356,7 +340,6 @@ namespace morse {
                     result += c
                 break;
                 default: 
-                    // Silence between any real characters
                     if(lastC!=null && lastC!=" " && lastC!="\n") {
                         result += " " 
                     }
@@ -368,13 +351,10 @@ namespace morse {
     }
 
     loops.everyInterval(UPDATE_INTERVAL, function () {
-        // Check for silences / dones (no key pressed for a bit)
         const now = control.millis()
         if(keyUpEvent!=null) {
             const duration = now - keyUpEvent
-            // Weed out any start states / empty codes (blips)
             if(state != START_STATE) {
-                // Check for letter completion
                 if (duration > _maxBetweenSymbolsTime) {
                     silence(Silence.InterLetter)
                     keyUpEvent = null
