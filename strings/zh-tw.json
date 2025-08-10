@@ -1,0 +1,55 @@
+{
+  "morse.keyDown": "按鍵按下",
+  "morse.keyDown.description": "按鍵被按下時觸發",
+
+  "morse.keyUp": "按鍵放開",
+  "morse.keyUp.description": "按鍵被放開時觸發",
+
+  "morse.setMaxDurationDotDash": "設定點劃最大時間（毫秒）",
+  "morse.setMaxDurationDotDash.description": "設定點與劃最大按鍵時間",
+
+  "morse.resetTiming": "重置計時",
+  "morse.resetTiming.description": "重置按鍵計時，忽略目前狀態",
+
+  "morse.maxDotTime": "最大點時間",
+  "morse.maxDotTime.description": "目前最大點時間",
+
+  "morse.maxDashTime": "最大劃時間",
+  "morse.maxDashTime.description": "目前最大劃時間",
+
+  "morse.setMaxSilenceBetweenSymbolsLetters": "設定符號與字母最大靜默（毫秒）",
+  "morse.setMaxSilenceBetweenSymbolsLetters.description": "設定符號與字母間最大靜默時間",
+
+  "morse.maxBetweenSymbolTime": "最大符號間靜默",
+  "morse.maxBetweenSymbolTime.description": "目前最大符號間靜默時間",
+
+  "morse.maxBetweenLetterTime": "最大字母間靜默",
+  "morse.maxBetweenLetterTime.description": "目前最大字母間靜默時間",
+
+  "morse.onNewSymbol": "偵測新符號",
+  "morse.onNewSymbol.description": "輸入新摩斯符號時觸發",
+
+  "morse.onCodeSelected": "代碼完成",
+  "morse.onCodeSelected.description": "完整摩斯代碼解碼後觸發",
+
+  "morse.resetDecoding": "重置解碼",
+  "morse.resetDecoding.description": "重置摩斯碼解碼狀態",
+
+  "morse.dot": "輸入點",
+  "morse.dot.description": "輸入摩斯碼點",
+
+  "morse.dash": "輸入劃",
+  "morse.dash.description": "輸入摩斯碼劃",
+
+  "morse.silence": "輸入靜默",
+  "morse.silence.description": "輸入點與劃之間靜默",
+
+  "morse.encode": "文字轉碼",
+  "morse.encode.description": "將文字轉為摩斯碼",
+
+  "morse.peekCode": "查看代碼",
+  "morse.peekCode.description": "查看目前輸入代碼",
+
+  "morse.peekSequence": "查看序列",
+  "morse.peekSequence.description": "查看目前輸入點劃序列"
+}
