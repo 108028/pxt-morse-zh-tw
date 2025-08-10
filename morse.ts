@@ -1,16 +1,15 @@
-
 //% color=#6a8694
 //% icon="\uf141"
-//% block="Morse Code"
-//% groups="['Keying', 'Decoding', 'Encoding', 'Advanced']"
+//% block="摩斯電碼"
+//% groups="['按鍵', '解碼', '編碼', '進階']"
 namespace morse {
 
     export enum Silence {
-        //% block="between letters"
+        //% block="字母間間隔"
         InterLetter = 3,
-        //% block="between words"
+        //% block="字詞間間隔"
         InterWord = 7,
-        //% block="dit silence"
+        //% block="點與點間間隔"
         Small = 0,
     }
         
@@ -44,8 +43,8 @@ namespace morse {
     /**
      * The "key" to enter a Morse character has been pressed
      */
-    //% blockId=keyDown block="key down"
-    //% group="Keying"
+    //% blockId=keyDown block="按鍵按下"
+    //% group="按鍵"
     //% weight=900
     export function keyDown() {
         const now = control.millis()
@@ -65,8 +64,8 @@ namespace morse {
     /**
      * The "key" to enter a Morse character has been released
      */
-    //% blockId=keyUp block="key up"
-    //% group="Keying"
+    //% blockId=keyUp block="按鍵放開"
+    //% group="按鍵"
     //% weight=875
     export function keyUp() {
         const now = control.millis()
@@ -94,9 +93,9 @@ namespace morse {
      * A dash will be any key hold between 10ms and the max dot time.  A dash will be anything greater than the dot time and less than the max dash time.
      * Values greater than the max dash time will "reset" the state of decoding.
      */
-    //% blockId=setMaxDurationDotDash block="set max duration of dot to $dotTime ms and dash $dashTime ms" 
+    //% blockId=setMaxDurationDotDash block="設定點長度為 $dotTime 毫秒，劃長度為 $dashTime 毫秒" 
     //% advanced=true
-    //% group="Keying"
+    //% group="按鍵"
     //% inlineInputMode=external
     //% weight=870
     //% dotTime.defl=200 dotTime.min=10 dotTime.max=5000
@@ -110,8 +109,8 @@ namespace morse {
     /**
      * The maximum length of time for a "dot" in milliseconds (1-5000ms)
      */
-    //% block="max dot time (ms)" 
-    //% group="Keying"
+    //% block="最大點長度 (毫秒)" 
+    //% group="按鍵"
     //% advanced=true
     //% weight=860
     export function maxDotTime() : number {
@@ -122,8 +121,8 @@ namespace morse {
     /**
      * The maximum length of time for a "dash" in milliseconds (2*max dot time-15000ms)
      */
-    //% block="max dash time (ms)" 
-    //% group="Keying"
+    //% block="最大劃長度 (毫秒)" 
+    //% group="按鍵"
     //% advanced=true
     //% weight=850
     export function maxDashTime(): number {
@@ -134,9 +133,9 @@ namespace morse {
     /**
      * Set the length of time for a silence events in milliseconds. The time between letters will always be at least the time between symbols.
     */
-    //% blockId=setMaxSilenceBetweenSymbolsLetters block="set max silence between symbols to $symbolTime ms and max silence between letters to $letterTime ms" 
+    //% blockId=setMaxSilenceBetweenSymbolsLetters block="設定符號間最大停頓時間 $symbolTime 毫秒，字母間最大停頓時間 $letterTime 毫秒" 
     //% advanced=true
-    //% group="Keying"
+    //% group="按鍵"
     //% weight=840
     //% inlineInputMode=external
     //% symbolTime.defl=500 symbolTime.min=10 symbolTime.max=5000
@@ -149,8 +148,8 @@ namespace morse {
     /**
      * The maximum length of time between symbols  (dots/dashes) in milliseconds
      */
-    //% block="max time between symbols (ms)" 
-    //% group="Keying"
+    //% block="最大符號間停頓時間 (毫秒)" 
+    //% group="按鍵"
     //% advanced=true
     //% weight=830
     export function maxBetweenSymbolTime(): number {
@@ -160,8 +159,8 @@ namespace morse {
     /**
      * The maximum length of time between letters of a word in milliseconds
      */
-    //% block="max time between letters (ms)" 
-    //% group="Keying"
+    //% block="最大字母間停頓時間 (毫秒)" 
+    //% group="按鍵"
     //% advanced=true
     //% weight=820
     export function maxBetweenLetterTime(): number {
@@ -172,8 +171,8 @@ namespace morse {
     /**
      * Reset timing for key up/down
      */
-    //% blockId=resetTiming block="reset timing"
-    //% group="Keying" advanced=true
+    //% blockId=resetTiming block="重設計時"
+    //% group="按鍵" advanced=true
     //% weight=810
     export function resetTiming() {
         keyDownEvent = null
@@ -184,8 +183,8 @@ namespace morse {
     /**
      *  Respond to a new symbol
      */
-    //% blockId=onNewSymbol block="on symbol $newSymbol entered"
-    //% group="Keying"
+    //% blockId=onNewSymbol block="當輸入新符號 $newSymbol 時"
+    //% group="按鍵"
     //% draggableParameters
     //% advanced=true
     //% weight=800
@@ -196,8 +195,8 @@ namespace morse {
     /**
      *  Respond to a completed code for a character (includes the sequences of dots/dashes). Code will be an underscore (_) when words are completed. 
      */
-    //% blockId=onCodeSelected block="on $code ($sequence) selected"
-    //% group="Decoding"
+    //% blockId=onCodeSelected block="當 $code ($sequence) 被解碼完成"
+    //% group="解碼"
     //% draggableParameters
     //% weight=775
     export function onCodeSelected(handler: (code: string, sequence: string) => void) {
@@ -207,8 +206,8 @@ namespace morse {
     /**
      * Record a complete dot
      */
-    //% blockId=dot block="dot"
-    //% group="Decoding"
+    //% blockId=dot block="點"
+    //% group="解碼"
     //% advanced=true
     //% weight=950
     export function dot() {
@@ -224,8 +223,8 @@ namespace morse {
     /**
      * Record a complete dash
      */
-    //% blockId=dash block="dash"
-    //% group="Decoding"
+    //% blockId=dash block="劃"
+    //% group="解碼"
     //% advanced=true
     //% weight=925
     export function dash() {
@@ -241,9 +240,9 @@ namespace morse {
     /**
      * Record a silence of some sort (between characters or words)
      */
-    //% blockId=silence block="silence $kind"
+    //% blockId=silence block="停頓 %kind"
     //% kind.defl=Silence.InterLetter
-    //% group="Decoding"
+    //% group="解碼"
     //% advanced=true
     //% weight=900
     export function silence(kind?: Silence) {
@@ -280,8 +279,8 @@ namespace morse {
     /**
      * Reset processing of a dot/dash/silence sequence
      */
-    //% blockId=resetDecoding block="reset decoding"
-    //% group="Decoding"
+    //% blockId=resetDecoding block="重設解碼狀態"
+    //% group="解碼"
     //% advanced=true
     //% weight=675
     export function resetDecoding() {
@@ -292,8 +291,8 @@ namespace morse {
     /**
        * Peek at the code that would be chosen from the current sequence if there is a sufficient silence
        */
-    //% blockId=peekCode block="peek current code"
-    //% group="Decoding"
+    //% blockId=peekCode block="檢視目前解碼"
+    //% group="解碼"
     //% advanced=true
     //% weight=820
     export function peekCode(): string {
@@ -304,8 +303,8 @@ namespace morse {
      * Peek at the sequence of dots/dashes that is currently entered. 
      * 
      */
-    //% blockId=peekSequence block="peek current sequence"
-    //% group="Decoding"
+    //% blockId=peekSequence block="檢視目前符號序列"
+    //% group="解碼"
     //% advanced=true
     //% weight=810
     export function peekSequence(): string {
@@ -342,8 +341,8 @@ namespace morse {
      * Encode the given characters to morse code.
      * @return string of dots, dashes, silences (between chars), _ (between words), "?" (invalid character for Morse Code), and newlines (for newlines).
      */
-    //% blockId=encode block="encode $characters to morse"
-    //% group="Encoding"
+    //% blockId=encode block="編碼 $characters 為摩斯電碼"
+    //% group="編碼"
     //% weight=500
     export function encode(characters: string) : string {
         let result = ""
