@@ -32,6 +32,6 @@
     "feedbackUrl": "http://siever.info"
   },
   "localizedStrings": {
-    "zh-tw": "./strings/zh-tw.json"
+    "en-us": "./strings/en-us.json"
   }
 }
